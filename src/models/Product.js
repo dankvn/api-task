@@ -12,7 +12,7 @@ const productSchema = new mongoose.Schema(
       type: Number,
       default: 0,
     },
-    imgURL: String,
+    imgURLs: [String],
   },
   {
     timestamps: true,

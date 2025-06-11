@@ -39,10 +39,7 @@ export const signupHandler = async (req, res) => {
 
 export const signinHandler = async (req, res) => {
   try {
-    // Request body email can be an email or username
-    const userFound = await User.findOne({ email: req.body.email }).populate(
-      "roles"
-    );
+    const userFound = await User.findOne({ email: req.body.email }).populate("roles");
 
     if (!userFound) return res.status(400).json({ message: "User Not Found" });
 
@@ -61,8 +58,16 @@ export const signinHandler = async (req, res) => {
       expiresIn: 86400, // 24 hours
     });
 
-    res.json({ token });
+    // ✅ Devuelve los datos completos al frontend
+    res.json({
+      token,
+      username: userFound.username,
+      roles: userFound.roles.map(role => role.name),
+    });
   } catch (error) {
     console.log(error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
+
+

@@ -14,7 +14,7 @@ router.get("/", getProducts);
 
 router.get("/:productId", getProductById);
 
-router.post("/", [verifyToken, isModerator], createProduct);
+router.post("/", [verifyToken,isAdmin], createProduct);
 
 router.put("/:productId", [verifyToken, isModerator], updateProductById);
 

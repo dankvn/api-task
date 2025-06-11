@@ -33,11 +33,11 @@ export const createUser = async (req, res) => {
 };
 
 export const getUsers = async (req, res) => {
-  const users = await User.find();
-  return res.json(users);
-};
-
-export const getUser = async (req, res) => {
-  const user = await User.findById(req.params.userId);
-  return res.json(user);
+  try {
+    const users = await User.find().populate("roles");
+    res.status(200).json(users);
+  } catch (error) {
+    console.error("Error al obtener usuarios:", error);
+    res.status(500).json({ message: "Error al obtener usuarios" });
+  }
 };

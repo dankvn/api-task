@@ -8,6 +8,7 @@ import indexRoutes from "./routes/index.routes.js";
 import productRoutes from "./routes/products.routes.js";
 import usersRoutes from "./routes/user.routes.js";
 import authRoutes from "./routes/auth.routes.js";
+import roleRoutes from './routes/role.routes.js';
 
 const app = express();
 
@@ -18,7 +19,7 @@ app.set("json spaces", 4);
 // Middlewares
 app.use(
   cors({
-    // origin: "http://localhost:3000",
+    // origin: "http://localhost:3000", "http://192.168.0.7:3000"
   })
 );
 app.use(helmet());
@@ -31,5 +32,6 @@ app.use("/api", indexRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/auth", authRoutes);
+app.use("/api/roles", roleRoutes);
 
 export default app;
