@@ -7,7 +7,8 @@ import {
   checkExistingRole,
   checkExistingUser,
 } from "../middlewares/verifySignup.js";
-
+import { getProfile } from '../controllers/auth.controller.js';
+import { verifyToken } from '../middlewares/authJwt.js';
 const router = Router();
 
 router.use((req, res, next) => {
@@ -21,5 +22,7 @@ router.use((req, res, next) => {
 router.post("/signup", [checkExistingUser, checkExistingRole], signupHandler);
 
 router.post("/signin", signinHandler);
+router.get('/me', [verifyToken], getProfile);
+
 
 export default router;

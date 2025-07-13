@@ -1,11 +1,20 @@
 import { Router } from "express";
-import { createUser, getUsers } from "../controllers/user.controller.js";
-import { isAdmin, verifyToken } from "../middlewares/authJwt.js";
+import {
+  createUser,
+  getUsers,
+  updateUser,
+  deleteUser,
+} from "../controllers/user.controller.js";
+
+import { isModeratorOrAdmin, verifyToken, isAdmin } from "../middlewares/authJwt.js";
 import { checkExistingUser } from "../middlewares/verifySignup.js";
 
 const router = Router();
 
-router.post("/", [verifyToken, isAdmin, checkExistingUser], createUser);
-router.get('/',[verifyToken, isAdmin], getUsers);
+router.post("/", [verifyToken], createUser);
+router.get("/", [verifyToken, isModeratorOrAdmin], getUsers);
+router.put("/:id", [verifyToken, isModeratorOrAdmin], updateUser);
+router.delete("/:id", [verifyToken, isModeratorOrAdmin], deleteUser);
+
 
 export default router;

@@ -41,7 +41,7 @@ export const updateRole = async (req, res) => {
     res.status(200).json(updatedRole);
   } catch (error) {
     res.status(500).json({ message: 'Error al actualizar el rol' });
-  }
+  }  
 };
 
 export const deleteRole = async (req, res) => {

@@ -21,37 +21,36 @@ export const verifyToken = async (req, res, next) => {
   }
 };
 
-export const isModerator = async (req, res, next) => {
-  try {
-    const user = await User.findById(req.userId);
-    const roles = await Role.find({ _id: { $in: user.roles } });
-    for (let i = 0; i < roles.length; i++) {
-      if (roles[i].name === "moderator") {
-        next();
-        return;
-      }
-    }
-    return res.status(403).json({ message: "Require Moderator Role!" });
-  } catch (error) {
-    return res.status(500).send({ message: error });
-  }
-};
-
 export const isAdmin = async (req, res, next) => {
   try {
     const user = await User.findById(req.userId);
     const roles = await Role.find({ _id: { $in: user.roles } });
 
-    for (let i = 0; i < roles.length; i++) {
-      if (roles[i].name === "admin") {
-        next();
-        return;
-      }
-    }
+    const isAdmin = roles.some((role) => role.name === "admin");
+
+    if (isAdmin) return next();
 
     return res.status(403).json({ message: "Require Admin Role!" });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+export const isModeratorOrAdmin = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.userId);
+    const roles = await Role.find({ _id: { $in: user.roles } });
+
+    const hasRole = roles.some(role =>
+      role.name === "admin" || role.name === "moderator"
+    );
+
+    if (hasRole) {
+      next();
+    } else {
+      return res.status(403).json({ message: "Require Moderator or Admin Role!" });
+    }
   } catch (error) {
-    console.log(error);
     return res.status(500).send({ message: error });
   }
 };

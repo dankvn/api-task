@@ -24,6 +24,7 @@ export const signupHandler = async (req, res) => {
     }
 
     // Saving the User Object in Mongodb
+    
     const savedUser = await newUser.save();
 
     // Create a token
@@ -39,35 +40,52 @@ export const signupHandler = async (req, res) => {
 
 export const signinHandler = async (req, res) => {
   try {
-    const userFound = await User.findOne({ email: req.body.email }).populate("roles");
+    console.log('Datos recibidos:', req.body); // 👈 IMPORTANTE
 
-    if (!userFound) return res.status(400).json({ message: "User Not Found" });
+    const { email, password } = req.body;
+    if (!email || !password)
+      return res.status(400).json({ message: "Email y contraseña requeridos" });
 
-    const matchPassword = await User.comparePassword(
-      req.body.password,
-      userFound.password
-    );
+    const userFound = await User.findOne({ email }).populate("roles");
 
-    if (!matchPassword)
-      return res.status(401).json({
-        token: null,
-        message: "Invalid Password",
-      });
+    if (!userFound) {
+      console.log("Usuario no encontrado para email:", email); // 👈 debug
+      return res.status(400).json({ message: "User Not Found" });
+    }
 
-    const token = jwt.sign({ id: userFound._id }, SECRET, {
-      expiresIn: 86400, // 24 hours
-    });
+    const matchPassword = await User.comparePassword(password, userFound.password);
 
-    // ✅ Devuelve los datos completos al frontend
-    res.json({
+    if (!matchPassword) {
+      console.log("Contraseña inválida para:", email); // 👈 debug
+      return res.status(401).json({ message: "Invalid Password" });
+    }
+
+    const token = jwt.sign({ id: userFound._id }, SECRET, { expiresIn: 86400 });
+
+    return res.json({
       token,
       username: userFound.username,
-      roles: userFound.roles.map(role => role.name),
+      roles: userFound.roles.map((r) => r.name),
     });
   } catch (error) {
-    console.log(error);
+    console.log("ERROR en signin:", error); // 👈 debug completo
     res.status(500).json({ message: "Internal server error" });
   }
 };
 
 
+export const getProfile = async (req, res) => {
+  try {
+    const user = await User.findById(req.userId).populate('roles', 'name');
+    if (!user) return res.status(404).json({ message: 'Usuario no encontrado' });
+
+    res.json({
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      roles: user.roles.map(role => ({ name: role.name }))
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Error al obtener perfil' });
+  }
+};

@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import { getRoles, createRole, getRole, updateRole, deleteRole } from '../controllers/role.controller.js';
-import { isAdmin, verifyToken } from "../middlewares/authJwt.js";
+import { isModeratorOrAdmin , verifyToken } from "../middlewares/authJwt.js";
 
 const router = Router();
 
-router.get('/', [verifyToken, isAdmin], getRoles);
-router.post('/', [verifyToken, isAdmin], createRole);
-router.get('/:roleId', [verifyToken, isAdmin], getRole);
-router.put('/:roleId', [verifyToken, isAdmin], updateRole);
-router.delete('/:roleId', [verifyToken, isAdmin], deleteRole);
+router.get('/', [verifyToken, isModeratorOrAdmin ], getRoles);
+router.post('/', [verifyToken, isModeratorOrAdmin ], createRole);
+router.get('/:roleId', [verifyToken, isModeratorOrAdmin ], getRole);
+router.put('/:roleId', [verifyToken, isModeratorOrAdmin ], updateRole);
+router.delete('/:roleId', [verifyToken, isModeratorOrAdmin ], deleteRole);
 
 export default router;

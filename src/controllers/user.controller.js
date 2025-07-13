@@ -5,9 +5,13 @@ export const createUser = async (req, res) => {
   try {
     const { username, email, password, roles } = req.body;
 
+    console.log("📥 Roles recibidos en el backend:", roles); 
+
     const rolesFound = await Role.find({ name: { $in: roles } });
 
-    // creating a new User
+    console.log("✅ Roles encontrados:", rolesFound); 
+
+
     const user = new User({
       username,
       email,
@@ -15,10 +19,7 @@ export const createUser = async (req, res) => {
       roles: rolesFound.map((role) => role._id),
     });
 
-    // encrypting password
-    user.password = await User.encryptPassword(user.password);
-
-    // saving the new user
+    
     const savedUser = await user.save();
 
     return res.status(200).json({
@@ -28,9 +29,11 @@ export const createUser = async (req, res) => {
       roles: savedUser.roles,
     });
   } catch (error) {
-    console.error(error);
+    console.error("❌ Error al crear usuario:", error);
+    res.status(400).json({ message: "Error al crear usuario" });
   }
 };
+
 
 export const getUsers = async (req, res) => {
   try {
@@ -41,3 +44,50 @@ export const getUsers = async (req, res) => {
     res.status(500).json({ message: "Error al obtener usuarios" });
   }
 };
+
+export const updateUser = async (req, res) => {
+  try {
+    const { username, email, roles, password } = req.body;
+
+    const updatedFields = { username, email };
+
+    if (roles && roles.length > 0) {
+      const rolesFound = await Role.find({ _id: { $in: roles } });
+      updatedFields.roles = rolesFound.map((role) => role._id);
+    }
+
+    if (password && password.trim() !== "") {
+      updatedFields.password = await User.encryptPassword(password);
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, updatedFields, {
+      new: true,
+    }).populate("roles");
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.error("Error al actualizar usuario:", error);
+    res.status(500).json({ message: "Error al actualizar usuario" });
+  }
+};
+
+
+export const deleteUser = async (req, res) => {
+  try {
+    const deletedUser = await User.findByIdAndDelete(req.params.id);
+
+    if (!deletedUser) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    res.status(200).json({ message: "Usuario eliminado correctamente" });
+  } catch (error) {
+    console.error("Error al eliminar usuario:", error);
+    res.status(500).json({ message: "Error al eliminar usuario" });
+  }
+};
+
